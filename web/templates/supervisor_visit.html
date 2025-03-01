@@ -1,0 +1,60 @@
+<form id="visitForm">
+    <label for="site_id">الموقع</label>
+    <input type="text" id="site_id" name="site_id" required>
+
+    <label for="problem_type">نوع المشكلة</label>
+    <select id="problem_type" name="problem_type">
+        <option value="Electrical">كهربائي</option>
+        <option value="Plumbing">سباكة</option>
+        <option value="Structure">هيكل</option>
+    </select>
+
+    <label for="description">وصف المشكلة</label>
+    <textarea id="description" name="description" required></textarea>
+
+    <button type="submit">تسجيل الزيارة</button>
+</form>
+
+<script>
+    // Fetch current location
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(validateLocation);
+        } else {
+            alert("جهازك لا يدعم تحديد الموقع الجغرافي.");
+        }
+    }
+
+    function validateLocation(position) {
+        var lat = position.coords.latitude;
+        var long = position.coords.longitude;
+
+        // Check if the supervisor is within the valid geo range
+        // Assuming the valid site coordinates are known
+        var valid_lat = 24.774265;  // Example latitude
+        var valid_long = 46.738586; // Example longitude
+
+        var distance = calculateDistance(lat, long, valid_lat, valid_long);
+        if (distance < 100) {  // Within 100 meters
+            document.getElementById("visitForm").submit();
+        } else {
+            alert("أنت خارج نطاق الموقع المحدد.");
+        }
+    }
+
+    function calculateDistance(lat1, long1, lat2, long2) {
+        var radlat1 = Math.PI * lat1 / 180;
+        var radlat2 = Math.PI * lat2 / 180;
+        var radlong1 = Math.PI * long1 / 180;
+        var radlong2 = Math.PI * long2 / 180;
+        var theta = long1 - long2;
+        var radtheta = Math.PI * theta / 180;
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist);
+        dist = dist * 180 / Math.PI;
+        dist = dist * 60 * 1.1515;  // In miles
+        return dist * 1609.34;  // Convert to meters
+    }
+
+    getLocation(); // Start location check when the form is opened
+</script>

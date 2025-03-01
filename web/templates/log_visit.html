@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الزيارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">تسجيل زيارة لموقع: {{ site.name }}</h1>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="visit_date" class="form-label">تاريخ الزيارة</label>
+                <input type="date" class="form-control" id="visit_date" name="visit_date" required>
+            </div>
+            <div class="mb-3">
+                <label for="issue_type" class="form-label">نوع المشكلة</label>
+                <select class="form-select" id="issue_type" name="issue_type" required>
+                    <option value="Plumbing">سباكة</option>
+                    <option value="Electrical">كهرباء</option>
+                    <option value="Cleaning">تنظيف</option>
+                    <option value="Maintenance">صيانة عامة</option>
+                    <option value="Other">أخرى</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="issue_description" class="form-label">وصف المشكلة</label>
+                <textarea class="form-control" id="issue_description" name="issue_description" rows="4" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="solution_taken" class="form-label">الإجراء المتخذ</label>
+                <textarea class="form-control" id="solution_taken" name="solution_taken" rows="4" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="issue_priority" class="form-label">أولوية المشكلة</label>
+                <select class="form-select" id="issue_priority" name="issue_priority" required>
+                    <option value="High">عالية</option>
+                    <option value="Medium">متوسطة</option>
+                    <option value="Low">منخفضة</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">تسجيل الزيارة</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة موقع جديد</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+
+    <!-- Leaflet CSS for the map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">إضافة موقع جديد</h1>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">اسم الموقع</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="mb-3">
+                <label for="location" class="form-label">الموقع</label>
+                <input type="text" class="form-control" id="location" name="location" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="latitude" class="form-label">خط العرض</label>
+                <input type="text" class="form-control" id="latitude" name="latitude" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="longitude" class="form-label">خط الطول</label>
+                <input type="text" class="form-control" id="longitude" name="longitude" required readonly>
+            </div>
+            <div class="mb-3">
+                <label for="supervisor_id" class="form-label">معرف المشرف</label>
+                <input type="text" class="form-control" id="supervisor_id" name="supervisor_id" required>
+            </div>
+            <button type="submit" class="btn btn-primary">إضافة الموقع</button>
+        </form>
+
+        <!-- OpenStreetMap Map -->
+        <div id="map"></div>
+    </div>
+
+    <!-- Leaflet JS for the map -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([31.9686, 35.1100], 5); // Default center (adjust as needed)
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Create a draggable marker
+        var marker = L.marker([31.9686, 35.1100], {draggable: true}).addTo(map);
+
+        // Update latitude, longitude, and location inputs when the marker is moved
+        marker.on('moveend', function(event) {
+            var lat = event.target.getLatLng().lat;
+            var lng = event.target.getLatLng().lng;
+
+            // Update form inputs
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+            document.getElementById('location').value = "Latitude: " + lat + ", Longitude: " + lng; // Optional: Show location string
+        });
+
+        // Set initial marker position and update the inputs
+        document.getElementById('latitude').value = marker.getLatLng().lat;
+        document.getElementById('longitude').value = marker.getLatLng().lng;
+        document.getElementById('location').value = "Latitude: " + marker.getLatLng().lat + ", Longitude: " + marker.getLatLng().lng;
+
+    </script>
+</body>
+</html>

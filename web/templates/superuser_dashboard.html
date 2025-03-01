@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المشرف</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <style>
+        /* General Styling */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        h2, h4 {
+            color: #343a40;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        p {
+            color: #555;
+            text-align: center;
+        }
+
+        /* Card Styling */
+        .card {
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .card-body {
+            text-align: center;
+        }
+
+        /* Button Styling */
+        .btn {
+            width: 100%;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background-color: #b02a37;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .btn {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- محتوى لوحة التحكم -->
+<div class="container">
+    <h2>مرحباً بك في لوحة تحكم المشرف</h2>
+    <p>لديك صلاحية كاملة للوصول إلى النظام. إليك بعض الإجراءات الرئيسية التي يمكنك القيام بها:</p>
+
+    <div class="row">
+        <!-- قسم إدارة المستخدمين -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    إدارة المستخدمين
+                </div>
+                <div class="card-body">
+                    <p>إنشاء أو تعديل أو حذف المستخدمين من النظام.</p>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-primary">إدارة المستخدمين</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم إدارة المواقع -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    إدارة المواقع
+                </div>
+                <div class="card-body">
+                    <p>إضافة أو تعديل أو حذف مواقع الصيانة من النظام.</p>
+                    <a href="{{ url_for('admin_sites') }}" class="btn btn-primary">إدارة المواقع</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم عرض التقارير -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    عرض التقارير
+                </div>
+                <div class="card-body">
+                    <p>عرض جميع التقارير التي تم تقديمها من قبل المشرفين.</p>
+                    <a href="{{ url_for('reports') }}" class="btn btn-primary">عرض التقارير</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات النظام -->
+    <div class="action-buttons">
+        <h4>إحصائيات النظام</h4>
+        <p>احصل على لمحة عامة عن إحصائيات النظام مثل عدد الزيارات المنجزة، المشاكل حسب النوع، إلخ.</p>
+        <a href="{{ url_for('statistics') }}" class="btn btn-success">عرض الإحصائيات</a>
+    </div>
+
+    <!-- أزرار الإدارة والإجراءات -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <a href="{{ url_for('add_supervisor') }}" class="btn btn-secondary">إضافة مشرف</a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('add_site') }}" class="btn btn-secondary">إضافة موقع</a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('manage_locations') }}" class="btn btn-secondary">إدارة المواقع</a>
+        </div>
+    </div>
+
+    <!-- زر تسجيل الخروج -->
+    <div class="action-buttons mt-4">
+        <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn btn-danger">تسجيل الخروج</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Statistics</h1>
+
+    <!-- Chart Section -->
+    <canvas id="statsChart" width="400" height="200"></canvas>
+    <script>
+        var ctx = document.getElementById('statsChart').getContext('2d');
+        var statsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ stats_labels|tojson }},
+                datasets: [{
+                    label: 'Issue Types',
+                    data: {{ stats_counts|tojson }},
+                    backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A8', '#FFFF33'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + ' visits';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

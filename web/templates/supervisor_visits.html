@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقارير الزيارات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">تقارير الزيارات</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>تاريخ الزيارة</th>
+                    <th>نوع المشكلة</th>
+                    <th>وصف المشكلة</th>
+                    <th>الإجراء المتخذ</th>
+                    <th>أولوية المشكلة</th>
+                    <th>حالة المشكلة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td>{{ report.visit_date }}</td>
+                    <td>{{ report.issue_type }}</td>
+                    <td>{{ report.issue_description }}</td>
+                    <td>{{ report.solution_taken }}</td>
+                    <td>{{ report.issue_priority }}</td>
+                    <td>{{ report.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

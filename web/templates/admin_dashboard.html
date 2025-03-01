@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المدير والمشرف</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+
+    <!-- Include Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            direction: rtl;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h1, h3 {
+            font-family: 'Arial', sans-serif;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            border: none;
+            height: 100%; /* Make cards fill the available height */
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+        }
+
+        .chart-container {
+            height: 300px;
+        }
+
+        .map-container {
+            height: 400px;
+        }
+
+        .table th, .table td {
+            text-align: right;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .col-12 {
+            flex: 1 0 100%; /* Full width on small screens */
+        }
+
+        .col-md-6 {
+            flex: 1 0 50%; /* Half width on medium screens */
+        }
+
+        .col-lg-4 {
+            flex: 1 0 33.33%; /* One third width on large screens */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Main Title -->
+        <h1 class="my-4 text-center">لوحة تحكم المدير والمشرف</h1>
+
+        <!-- Date Range Filter Form for Supervisor -->
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>تصفية حسب الفترة الزمنية</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('export_excel') }}">
+                            <div class="form-group">
+                                <label for="start_date">تاريخ البداية</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="end_date">تاريخ النهاية</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">تصدير التقرير إلى Excel</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- First Card: Supervisor's Overview -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>صفحة عرض مجريات الصيانة</h3>
+                    </div>
+                    <div class="card-body">
+                        <h5>إحصائيات اليوم</h5>
+                        <p><strong>إجمالي الزيارات اليوم:</strong> {{ total_visits }}</p>
+
+                        <!-- Planned Visits for the Day -->
+                        <h5>المواقع المخطط زيارتها اليوم</h5>
+                        <ul>
+                            {% for site in planned_sites %}
+                                <li>{{ site.name }} - الوقت: {{ site.visit_time }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <!-- Display Statistics for Reported Issues -->
+                        <h5>إحصائيات حول عدد المشكلات المحصورة اليوم</h5>
+                        <div class="chart-container">
+                            <canvas id="issueChart"></canvas>
+                        </div>
+
+                        <!-- Display Graphs -->
+                        <h5>رسومات بيانية توضيحية</h5>
+                        <div class="chart-container">
+                            <canvas id="visitStatsChart"></canvas>
+                        </div>
+
+                        <p>البيانات محدثة لحظياً لضمان الدقة في المتابعة.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second Card: Site Management (Add/Edit/Delete) -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>إدارة المواقع المستهدفة للصيانة</h3>
+                    </div>
+                    <div class="card-body">
+                        <h5>إضافة موقع جديد</h5>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSiteModal">
+                            إضافة موقع جديد
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="addSiteModal" tabindex="-1" aria-labelledby="addSiteModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="addSiteModalLabel">إضافة موقع جديد</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                <form action="{{ url_for('add_site') }}" method="POST">
+                                  <div class="mb-3">
+                                    <label for="site_name" class="form-label">اسم الموقع</label>
+                                    <input type="text" class="form-control" id="site_name" name="site_name" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="location" class="form-label">الموقع الجغرافي</label>
+                                    <input type="text" class="form-control" id="location" name="location" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="latitude" class="form-label">خط العرض</label>
+                                    <input type="text" class="form-control" id="latitude" name="latitude" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="longitude" class="form-label">خط الطول</label>
+                                    <input type="text" class="form-control" id="longitude" name="longitude" required>
+                                  </div>
+                                  <div class="mb-3">
+                                    <label for="supervisor" class="form-label">المشرف</label>
+                                    <select class="form-control" id="supervisor" name="supervisor">
+                                        {% for supervisor in supervisors %}
+                                            <option value="{{ supervisor.id }}">{{ supervisor.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                  </div>
+                                  <button type="submit" class="btn btn-primary">إضافة الموقع</button>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Modify Site Data -->
+                        <h5>تعديل بيانات المواقع</h5>
+                        <p>هنا يمكنك تعديل بيانات الموقع الموجود.</p>
+
+                        <!-- List of Sites -->
+                        <h5>المواقع المسجلة</h5>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>اسم الموقع</th>
+                                    <th>الموقع الجغرافي</th>
+                                    <th>المشرف</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for site in sites %}
+                                    <tr>
+                                        <td>{{ site.name }}</td>
+                                        <td>{{ site.location }}</td>
+                                        <td>{{ site.supervisor.name }}</td>
+                                        <td>
+                                            <a href="{{ url_for('edit_site', site_id=site.id) }}" class="btn btn-warning btn-sm">تعديل</a>
+                                            <a href="{{ url_for('delete_site', site_id=site.id) }}" class="btn btn-danger btn-sm">حذف</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Delete Inactive or Closed Sites -->
+                        <h5>حذف المواقع غير النشطة أو المغلقة</h5>
+                        <p>يمكنك حذف المواقع التي لا تكون نشطة أو مغلقة من خلال الأزرار المناسبة.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- Row End -->
+
+    </div> <!-- Container End -->
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Example for Issue Statistics Pie Chart
+        var issueData = {
+            labels: ["مشكلة نوع 1", "مشكلة نوع 2", "مشكلة نوع 3"],
+            datasets: [{
+                data: [30, 50, 20],
+                backgroundColor: ['#FF5733', '#33FF57', '#3357FF']
+            }]
+        };
+
+        var ctx1 = document.getElementById('issueChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'pie',
+            data: issueData
+        });
+
+        // Example for Visit Stats Bar Chart
+        var visitData = {
+            labels: ["زيارة نوع 1", "زيارة نوع 2", "زيارة نوع 3"],
+            datasets: [{
+                label: 'عدد الزيارات',
+                data: [5, 10, 7],
+                backgroundColor: '#007bff'
+            }]
+        };
+
+        var ctx2 = document.getElementById('visitStatsChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'bar',
+            data: visitData
+        });
+    </script>
+
+</body>
+
+</html>

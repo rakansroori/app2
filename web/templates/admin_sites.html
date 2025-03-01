@@ -1,0 +1,213 @@
+<div class="container mt-4">
+    <h3 class="mb-3 text-primary">🔹 قائمة المواقع</h3>
+
+    <!-- Search & Filters -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="searchName" class="form-control" placeholder="🔍 البحث عن اسم الموقع...">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="searchLocation" class="form-control" placeholder="📍 البحث عن الموقع...">
+        </div>
+        <div class="col-md-4">
+            <input type="date" id="searchDate" class="form-control">
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="mb-3">
+        <button class="btn btn-success" id="bulkEditBtn">✏️ تعديل المحدد</button>
+        <button class="btn btn-danger" id="bulkDeleteBtn">🗑️ حذف المحدد</button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th><input type="checkbox" id="selectAll"></th>
+                    <th>#</th>
+                    <th>📌 اسم الموقع</th>
+                    <th>📍 الموقع</th>
+                    <th>⚠️ المشكلة</th>
+                    <th>✅ الحل</th>
+                    <th>💰 التكلفة</th>
+                    <th>📅 التاريخ</th>
+                    <th>🛠️ الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="sitesTable">
+                {% for site in sites %}
+                <tr>
+                    <td><input type="checkbox" class="select-site" value="{{ site._id }}"></td>
+                    <td>{{ loop.index }}</td>
+                    <td class="site-name">{{ site.name }}</td>
+                    <td class="site-location">{{ site.location }}</td>
+                    <td class="site-problem">{{ site.problem }}</td>
+                    <td>{{ site.solution }}</td>
+                    <td>{{ site.cost }} د.إ</td>
+                    <td class="site-date">{{ site.date }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_site', site_id=site._id) }}" class="action-btn edit-btn">✏️ تعديل</a>
+                        <a href="{{ url_for('delete_site', site_id=site._id) }}" class="action-btn delete-btn">🗑️ حذف</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    /* Table Styling */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .thead-dark th {
+        background: #343a40;
+        color: white;
+        text-align: center;
+        padding: 12px;
+    }
+
+    .table-hover tbody tr:hover {
+        background: #f8f9fa;
+        transition: background 0.2s ease-in-out;
+    }
+
+    td {
+        vertical-align: middle;
+        text-align: center;
+        padding: 12px;
+    }
+
+    /* Button Styling */
+    .action-btn {
+        display: inline-block;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 2px;
+        transition: 0.3s;
+    }
+
+    .edit-btn {
+        background: #ffca2c;
+        color: #333;
+        border: 1px solid #ffb700;
+    }
+
+    .edit-btn:hover {
+        background: #e0a800;
+        color: white;
+    }
+
+    .delete-btn {
+        background: #e74c3c;
+        color: white;
+        border: 1px solid #c0392b;
+    }
+
+    .delete-btn:hover {
+        background: #c0392b;
+    }
+
+    /* Bulk Action Buttons */
+    #bulkEditBtn, #bulkDeleteBtn {
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px 15px;
+        margin: 5px;
+    }
+
+    /* Search Inputs */
+    #searchName, #searchLocation, #searchDate {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    /* Responsive Table */
+    .table-responsive {
+        overflow-x: auto;
+    }
+</style>
+
+<script>
+    document.getElementById("searchName").addEventListener("keyup", function() {
+        filterTable();
+    });
+
+    document.getElementById("searchLocation").addEventListener("keyup", function() {
+        filterTable();
+    });
+
+    document.getElementById("searchDate").addEventListener("change", function() {
+        filterTable();
+    });
+
+    function filterTable() {
+        var nameFilter = document.getElementById("searchName").value.toLowerCase();
+        var locationFilter = document.getElementById("searchLocation").value.toLowerCase();
+        var dateFilter = document.getElementById("searchDate").value;
+        var rows = document.querySelectorAll("#sitesTable tr");
+
+        rows.forEach(function(row) {
+            var siteName = row.querySelector(".site-name").textContent.toLowerCase();
+            var siteLocation = row.querySelector(".site-location").textContent.toLowerCase();
+            var siteDate = row.querySelector(".site-date").textContent.trim();
+
+            var matchName = siteName.includes(nameFilter);
+            var matchLocation = siteLocation.includes(locationFilter);
+            var matchDate = dateFilter === "" || siteDate === dateFilter;
+
+            row.style.display = matchName && matchLocation && matchDate ? "" : "none";
+        });
+    }
+
+    // Select/Deselect All
+    document.getElementById("selectAll").addEventListener("change", function() {
+        var checkboxes = document.querySelectorAll(".select-site");
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Bulk Edit
+    document.getElementById("bulkEditBtn").addEventListener("click", function() {
+        var selectedSites = getSelectedSites();
+        if (selectedSites.length === 0) {
+            alert("❌ لم يتم اختيار أي موقع!");
+            return;
+        }
+        alert("🔧 تعديل المواقع المحددة: " + selectedSites.join(", "));
+        // Redirect to a bulk edit page or open a modal
+    });
+
+    // Bulk Delete
+    document.getElementById("bulkDeleteBtn").addEventListener("click", function() {
+        var selectedSites = getSelectedSites();
+        if (selectedSites.length === 0) {
+            alert("❌ لم يتم اختيار أي موقع!");
+            return;
+        }
+        if (confirm("⚠️ هل أنت متأكد أنك تريد حذف المواقع المحددة؟")) {
+            alert("🗑️ حذف المواقع: " + selectedSites.join(", "));
+            // Send an AJAX request to delete the selected sites
+        }
+    });
+
+    // Get selected site IDs
+    function getSelectedSites() {
+        var selected = [];
+        document.querySelectorAll(".select-site:checked").forEach(cb => {
+            selected.push(cb.value);
+        });
+        return selected;
+    }
+</script>

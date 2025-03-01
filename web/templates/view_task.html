@@ -1,0 +1,22 @@
+<!-- view_task.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Task</title>
+</head>
+<body>
+    <h1>Task: {{ task.name }}</h1>
+    <p>Status: {{ task.status }}</p>
+
+    <form method="POST">
+        <label> for="status">Update Status:</label>
+        <select> name="status">
+            <option> value="In Progress" {% if task.status == "In Progress" %} selected {% endif %}>In Progress</option>
+            <option> value="Completed" {% if task.status == "Completed" %} selected {% endif %}>Completed</option>
+        </select>
+        <button type="submit">Update Task</button>
+    </form>
+</body>
+</html>

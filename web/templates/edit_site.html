@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعديل الموقع</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">تعديل الموقع</h1>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">اسم الموقع</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ site.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="location" class="form-label">الموقع</label>
+                <input type="text" class="form-control" id="location" name="location" value="{{ site.location }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="latitude" class="form-label">خط العرض</label>
+                <input type="text" class="form-control" id="latitude" name="latitude" value="{{ site.geo_coordinates.lat }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="longitude" class="form-label">خط الطول</label>
+                <input type="text" class="form-control" id="longitude" name="longitude" value="{{ site.geo_coordinates.long }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="supervisor_id" class="form-label">معرف المشرف</label>
+                <input type="text" class="form-control" id="supervisor_id" name="supervisor_id" value="{{ site.supervisor_id }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">تعديل الموقع</button>
+        </form>
+    </div>
+</body>
+</html>

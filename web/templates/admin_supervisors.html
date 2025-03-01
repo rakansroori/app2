@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المشرفين</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">إدارة المشرفين</h1>
+        <a href="{{ url_for('add_supervisor') }}" class="btn btn-primary mb-3">إضافة مشرف جديد</a>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>رقم الهاتف</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for supervisor in supervisors %}
+                <tr>
+                    <td>{{ supervisor.name }}</td>
+                    <td>{{ supervisor.email }}</td>
+                    <td>{{ supervisor.phone }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_supervisor', supervisor_id=supervisor._id) }}" class="btn btn-warning">تعديل</a>
+                        <a href="{{ url_for('assign_supervisor', site_id=supervisor._id) }}" class="btn btn-info">تعيين لموقع</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

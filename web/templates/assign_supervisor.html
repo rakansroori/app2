@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعيين مشرف لموقع</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">تعيين مشرف لموقع</h1>
+        <form method="POST">
+            <div class="mb-3">
+                <label for="supervisor_id" class="form-label">اختر المشرف</label>
+                <select class="form-select" id="supervisor_id" name="supervisor_id" required>
+                    {% for supervisor in supervisors %}
+                    <option value="{{ supervisor._id }}">{{ supervisor.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">تعيين المشرف</button>
+        </form>
+    </div>
+</body>
+</html>

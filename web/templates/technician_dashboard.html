@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الفني</title>
+    <!-- Leaflet CSS for map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Optionally add Bootstrap for styling -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+    <!-- Header and greeting -->
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>مرحبًا، {{ current_user.username }}</h1>
+                <p>هنا يمكنك متابعة المهام الموكلة إليك.</p>
+            </div>
+            <!-- Logout Button -->
+            <form method="POST" action="{{ url_for('logout') }}">
+                <button type="submit" class="btn btn-danger">تسجيل الخروج</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Overview Section -->
+    <div class="container mt-5">
+        <h2>مهامك الموكلة</h2>
+        <div class="row">
+            {% for task in assigned_tasks %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ task.name }}</h5>
+                            <p class="card-text">الحالة: {{ task.status }}</p>
+                            <p class="card-text">الموعد النهائي: {{ task.deadline }}</p>
+                            <p class="card-text">الموقع: {{ task.site.site_name }}</p>
+                            <a href="#" class="btn btn-primary" onclick="openVisitForm({{ task.id }})">تفاصيل الزيارة</a>
+                            <form method="POST" action="{{ url_for('update_task_status', task_id=task.id) }}" class="mt-2">
+                                <button type="submit" class="btn btn-warning">تغيير الحالة</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Monthly Site Visit Plan Section -->
+    <div class="container mt-5">
+        <h2>زيارة المواقع وفق خطة شهرية</h2>
+        <div class="row">
+            {% for site in monthly_planned_sites %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ site.name }}</h5>
+                            <p class="card-text">الموعد: {{ site.visit_date }}</p>
+                            <p class="card-text">المنطقة: {{ site.location }}</p>
+                            <a href="#" class="btn btn-primary" onclick="openVisitForm({{ site.id }})">تفاصيل الزيارة</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Reports Section (Visits, Issues, and Solutions) -->
+    <div class="container mt-5">
+        <h2>تسجيل تقارير الزيارات والمشاكل والحلول</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('submit_report') }}">
+                    <div class="form-group">
+                        <label for="visitDetails">تفاصيل الزيارة</label>
+                        <textarea class="form-control" id="visitDetails" name="visit_details" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueDescription">وصف المشكلة</label>
+                        <textarea class="form-control" id="issueDescription" name="issue_description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="proposedSolution">الحل المقترح</label>
+                        <textarea class="form-control" id="proposedSolution" name="proposed_solution" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">إرسال التقرير</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggest Improvements for Infrastructure Section -->
+    <div class="container mt-5">
+        <h2>اقتراح حلول للصيانة وتحسين البنية التحتية</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('submit_visit_report') }}">
+                    <div class="form-group">
+                        <label for="improvementSuggestion">اقتراح التحسين</label>
+                        <textarea class="form-control" id="improvementSuggestion" name="improvement_suggestion" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">إرسال الاقتراح</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="container mt-5">
+        <h2>مواقع المهام على الخريطة</h2>
+        <div id="map" style="width: 100%; height: 500px;"></div>
+    </div>
+
+    <!-- Visit Form (Modal) -->
+    <div class="modal" id="visitFormModal" tabindex="-1" role="dialog" aria-labelledby="visitFormLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="visitFormLabel">تقرير الزيارة</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="taskName">اسم المهمة</label>
+                            <input type="text" class="form-control" id="taskName" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueType">نوع المشكلة</label>
+                            <select class="form-control" id="issueType">
+                                <option>اختيار المشكلة</option>
+                                <option>مشكلة كهربائية</option>
+                                <option>مشكلة في التكييف</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDescription">وصف المشكلة</label>
+                            <textarea class="form-control" id="issueDescription"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuePriority">الأولوية</label>
+                            <select class="form-control" id="issuePriority">
+                                <option>عادي</option>
+                                <option>عاجل</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">إرسال التقرير</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js integration -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div class="container mt-5">
+        <h2>إحصائيات المهام</h2>
+        <canvas id="taskStatusChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        var ctx = document.getElementById('taskStatusChart').getContext('2d');
+        var taskStatusChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['مكتمل', 'قيد المعالجة', 'معلق'],
+                datasets: [{
+                    label: 'عدد المهام',
+                    data: [{{ completed_tasks_count }}, {{ in_progress_tasks_count }}, {{ pending_tasks_count }}],
+                    backgroundColor: ['#4CAF50', '#FFEB3B', '#F44336'],
+                    borderColor: ['#4CAF50', '#FFEB3B', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Leaflet JS for Map -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Optionally add jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([51.505, -0.09], 13);  // Default position
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        {% for task in assigned_tasks %}
+            {% if task.site_id %}
+                // Add a marker for each task site
+                var marker = L.marker([{{ task.site.geo_coordinates.lat }}, {{ task.site.geo_coordinates.long }}]).addTo(map);
+                marker.bindPopup("<b>{{ task.site.site_name }}</b><br>Lat: {{ task.site.geo_coordinates.lat }}, Lon: {{ task.site.geo_coordinates.long }}");
+            {% endif %}
+        {% endfor %}
+
+        // Open Visit Form Modal on click
+        function openVisitForm(taskId) {
+            // Fetch task details and open modal
+            // Populate modal with task data dynamically
+            $('#visitFormModal').modal('show');
+        }
+    </script>
+</body>
+</html>

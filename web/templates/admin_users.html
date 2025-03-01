@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<!-- محتوى إدارة المستخدمين -->
+<div class="container mt-4">
+    <h2>إدارة المستخدمين</h2>
+
+    <!-- إضافة أو تعديل مستخدم -->
+    <div class="card">
+        <div class="card-header">
+            <h5>إضافة أو تعديل مستخدم</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin_users') }}">
+                <div class="form-group">
+                    <label for="user_type">نوع المستخدم</label>
+                    <select class="form-control" id="user_type" name="user_type" required>
+                        <option value="admin">مدير</option>
+                        <option value="supervisor">مشرف</option>
+                        <option value="technician">فني</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="username">اسم المستخدم</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">كلمة المرور</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">إضافة/تعديل المستخدم</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- عرض قائمة المستخدمين -->
+    <div class="mt-4">
+        <h3>قائمة المستخدمين</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>نوع المستخدم</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user['username'] }}</td>
+                    <td>{{ user['email'] }}</td>
+                    <td>{{ user['user_type'] }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_user', user_id=user['_id']) }}" class="btn btn-warning">تعديل</a>
+                        <form action="{{ url_for('delete_user', user_id=user['_id']) }}" method="POST" class="d-inline-block">
+                            <button type="submit" class="btn btn-danger">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
